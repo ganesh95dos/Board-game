@@ -5,7 +5,7 @@ pipeline {
     environment {
         IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
         IMAGE_TAG = 'latest'
-        DOCKER_REGISTRY_CREDENTIALS = 'ganesh95dos'  // Jenkins credentials ID
+        DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID
     }
 
     stages {
