@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  h2:
+    image: oscarfonts/h2
+    container_name: h2-database
+    ports:
+      - "1521:1521"  # H2 TCP port
+      - "81:81"      # H2 web console
+    environment:
+      H2_OPTIONS: -ifNotExists -tcp -tcpAllowOthers -web -webAllowOthers
+    volumes:
+      - h2-data:/opt/h2-data
+
+  boardgame-app:
+    image: ganeshmestry21/bord-game-dev:latest
+    ports:
+      - "8081:8080"
+    depends_on:
+      - h2
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:h2:tcp://h2:1521/boardgame-db
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.h2.Driver
+      SPRING_DATASOURCE_USERNAME: sa
+      SPRING_DATASOURCE_PASSWORD:
+      SPRING_H2_CONSOLE_ENABLED: "true"
+      SPRING_H2_CONSOLE_PATH: /h2-console
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_SQL_INIT_MODE: always
+      SPRING_SQL_INIT_SCHEMA_LOCATIONS: classpath:/schema.sql
+    volumes:
+      - h2-data:/opt/h2-data
+
+volumes:
+  h2-data:
