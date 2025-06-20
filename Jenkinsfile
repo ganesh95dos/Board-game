@@ -10,7 +10,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ganesh95dos/Board-game.git', branch 'main' // replace with your repo
+                git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
             }
         }
 
