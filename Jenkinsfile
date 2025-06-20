@@ -1,60 +1,64 @@
-@Library('Shared@main') _
 pipeline {
     agent any
+
     environment {
-        SONAR_HOME = tool "sonar"
+        IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
+        IMAGE_TAG = 'latest'
+        DOCKER_REGISTRY_CREDENTIALS = 'ganesh95dos'  // Jenkins credentials ID
     }
+
     stages {
-        stage('Clone') {
+        stage('Checkout') {
             steps {
-                git url: 'https://github.com/ganesh95dos/Bord_Game.git', branch: 'main'
+                git 'https://github.com/ganesh95dos/Bord_Game.git' // replace with your repo
             }
         }
-        stage('SonarQube Quality Analysis') {
+
+        stage('Build with Maven') {
             steps {
-                withSonarQubeEnv('sonar') {
-                    sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
+                sh 'mvn clean package -DskipTests'
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
                 }
             }
         }
-        
-        stage('OWASP Dependency Check') {
-            steps {
-                dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
-                dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
-            }
-        }
 
-        stage('SonarQube Quality Gate Scan') {
+        stage('Push to DockerHub') {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
+                script {
+                    docker.withRegistry('', "${DOCKER_REGISTRY_CREDENTIALS}") {
+                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
+                    }
                 }
             }
         }
-        stage('Trivy File System Scan') {
+
+        stage('Deploy with Docker Compose') {
             steps {
-                sh 'trivy fs --format table -o trivy-fs-report.html .'
+                sh 'docker-compose down || true'
+                sh 'docker-compose pull'
+                sh 'docker-compose up -d'
             }
         }
+    }
 
-         stage("Build and Test"){
-            steps{
-               docker_build("board-app", "latest")
-              }
+    post {
+        success {
+            echo '✅ Deployment successful!'
         }
-
-        stage('Build and Push Image to Docker Hub') {
-            steps {
-                docker_push("board-app", "latest", "ganeshmestry21")
-                echo 'Hello, this image has been pushed to Docker Hub successfully'
-            }
-        }
-
-        stage('Deploy Code') {
-            steps{
-                deploy()
-            }
+        failure {
+            echo '❌ Build or deployment failed.'
         }
     }
 }
