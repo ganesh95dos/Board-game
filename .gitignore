@@ -1,0 +1,27 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.jar
+
+# Eclipse / IntelliJ / VSCode
+.idea/
+*.iml
+.vscode/
+
+# Logs
+*.log
+
+# OS
+.DS_Store
+
+# Build
+*.class
+*.jar
+*.war
+*.ear
+
+# Docker
+**/docker-compose.override.yml
+
+# Sonar
+.sonar/
+
