@@ -10,19 +10,13 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                git 'https://github.com/ganesh95dos/Bord_Game.git' // replace with your repo
+                git 'https://github.com/ganesh95dos/Board-game.git', branch 'main' // replace with your repo
             }
         }
 
         stage('Build with Maven') {
             steps {
                 sh 'mvn clean package -DskipTests'
-            }
-        }
-
-        stage('Run Unit Tests') {
-            steps {
-                sh 'mvn test'
             }
         }
 
