@@ -6,6 +6,7 @@ pipeline {
         IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
         IMAGE_TAG = 'latest'
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID
+        SONAR_HOME = '/opt/sonar-scanner'
     }
 
     stages {
