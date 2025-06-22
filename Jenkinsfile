@@ -10,9 +10,9 @@ pipeline {
     }
 
     stages {
-        stage('Checkout') {
-            steps {
-                git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
+        stage("Clone Code"){
+            steps{
+                clone("https://github.com/ganesh95dos/Board-game.git","main")
             }
         }
 
@@ -51,33 +51,23 @@ pipeline {
             }
         }
 
-        stage('Build Docker Image') {
-            steps {
-                script {
-                    docker.build("${IMAGE_NAME}:${IMAGE_TAG}")
-                }
-            }
-        }
-
-        stage('Docker Hub login'){
+       
+        stage("Build and Test"){
             steps{
-                sh 'docker login'
+                docker_build("${IMAGE_NAME}:${IMAGE_TAG}")
             }
         }
 
-        stage('Push to DockerHub') {
+        stage('Build and Push Image to Docker Hub') {
             steps {
-                script {
-                    docker.withRegistry('', "${DOCKER_REGISTRY_CREDENTIALS}") {
-                        docker.image("${IMAGE_NAME}:${IMAGE_TAG}").push()
-                    }
-                }
+                docker_push("${IMAGE_NAME}:${IMAGE_TAG}","ganeshmestry21", )
+                echo 'Hello, this image has been pushed to Docker Hub successfully'
             }
         }
-
+       
         stage('Deploy with Docker Compose') {
             steps {
-                sh 'docker-compose down || true'
+                sh 'docker-compose down -v || true'
                 sh 'docker-compose pull'
                 sh 'docker-compose up -d'
             }
