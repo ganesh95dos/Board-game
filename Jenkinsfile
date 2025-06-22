@@ -10,10 +10,8 @@ pipeline {
     }
 
     stages {
-        stage("Clone Code"){
-            steps{
-                clone("https://github.com/ganesh95dos/Board-game.git","main")
-            }
+        steps {
+            git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
         }
 
         stage('SonarQube Quality Analysis') {
