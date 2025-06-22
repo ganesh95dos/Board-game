@@ -19,8 +19,11 @@ pipeline {
         stage('SonarQube Quality Analysis') {
             steps {
                 withSonarQubeEnv('sonar') {
-                    sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
-                }
+                    script {
+                        def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
+                    }
+                 }
             }
         }
 
