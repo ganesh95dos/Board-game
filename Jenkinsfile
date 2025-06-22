@@ -55,23 +55,17 @@ pipeline {
         }
 
        
-        stage("Build and Test") {
+        stage("Build and Test Push Image to Docker Hub") {
     steps {
         withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
             sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
             sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+            sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+            echo '✅ Image pushed to Docker Hub successfully!'
         }
     }
 }
 
-        stage('Build and Push Image to Docker Hub') {
-        steps {
-            sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-            echo '✅ Image pushed to Docker Hub successfully!'
-                 }
-            }
-        }
-       
         stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down -v || true'
@@ -79,7 +73,7 @@ pipeline {
                 sh 'docker-compose up -d'
             }
         }
-    }
+    
 
     post {
         success {
