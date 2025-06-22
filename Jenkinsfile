@@ -10,7 +10,7 @@ pipeline {
     }
 
     stages {
-        stage{
+        stage('Clone'){
             steps {
                 git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
                 }
