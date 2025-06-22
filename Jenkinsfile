@@ -10,8 +10,10 @@ pipeline {
     }
 
     stages {
-        steps {
-            git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
+        stage{
+            steps {
+                git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
+                }
         }
 
         stage('SonarQube Quality Analysis') {
