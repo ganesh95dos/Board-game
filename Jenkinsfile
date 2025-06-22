@@ -6,14 +6,14 @@ pipeline {
         IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
         IMAGE_TAG = 'latest'
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID
-        SONAR_HOME = tool'sonar'
+        SONAR_HOME = tool 'sonar'
     }
 
     stages {
-        stage('Clone'){
+        stage('Clone') {
             steps {
                 git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
-                }
+            }
         }
 
         stage('SonarQube Quality Analysis') {
@@ -23,7 +23,7 @@ pipeline {
                         def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                         sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
                     }
-                 }
+                }
             }
         }
 
@@ -41,7 +41,7 @@ pipeline {
                 }
             }
         }
-        
+
         stage('Trivy File System Scan') {
             steps {
                 sh 'trivy fs --format table -o trivy-fs-report.html .'
@@ -54,17 +54,16 @@ pipeline {
             }
         }
 
-       
-        stage("Build and Test Push Image to Docker Hub") {
-    steps {
-        withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-            sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-            sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-            sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
-            echo '✅ Image pushed to Docker Hub successfully!'
+        stage("Build, Test, and Push Image to Docker Hub") {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
+                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    echo '✅ Image pushed to Docker Hub successfully!'
+                }
+            }
         }
-    }
-}
 
         stage('Deploy with Docker Compose') {
             steps {
@@ -73,7 +72,7 @@ pipeline {
                 sh 'docker-compose up -d'
             }
         }
-    
+    }
 
     post {
         success {
