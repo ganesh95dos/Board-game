@@ -68,7 +68,7 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down -v || true'
-                sh 'docker image prune'
+                sh 'docker image prune y'
                 sh 'docker-compose pull'
                 sh 'docker-compose up -d'
             }
