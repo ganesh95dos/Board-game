@@ -81,8 +81,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker build -t ${IMAGE_NAME}:"${params.BACKEND_DOCKER_TAG}" ."
-                    sh "docker push ${IMAGE_NAME}:"${params.BACKEND_DOCKER_TAG}""
+                    sh "docker build -t ${IMAGE_NAME}:"${params.FRONTEND_DOCKER_TAG}" ."
+                    sh "docker push ${IMAGE_NAME}:"${params.FRONTEND_DOCKER_TAG}""
                     echo '✅ Image pushed to Docker Hub successfully!'
                 }
             }
