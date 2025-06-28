@@ -5,7 +5,7 @@ pipeline {
     environment {
         SONAR_HOME = tool 'sonar'
     }
-
+    
     parameters {
         string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Docker image tag for frontend (e.g., v1, latest)')
     }
