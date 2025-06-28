@@ -93,4 +93,10 @@ pipeline {
 
     post {
         success {
-            echo '✅ Pipeline complete
+            echo '✅ Deployment successful!'
+        }
+        failure {
+            echo '❌ Build or deployment failed.'
+        }
+    }
+}
