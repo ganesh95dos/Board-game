@@ -39,6 +39,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
+                        def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                         sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectName=Board-Game -Dsonar.projectKey=Board-Game"
                     }
                 }
