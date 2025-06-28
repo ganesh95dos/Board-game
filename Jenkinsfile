@@ -26,31 +26,38 @@ pipeline {
                 cleanWs()
             }
         }
-stage('Clone') {
+
+        stage("Clone") {
             steps {
                 git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
             }
         }
 
-        stage('SonarQube Quality Analysis') {
+        stage("SonarQube Quality Analysis") {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
                         def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
+                        sh """
+                            ${scannerHome}/bin/sonar-scanner \
+                            -Dsonar.projectKey=Bord-game \
+                            -Dsonar.projectName=Bord-Game \
+                            -Dsonar.sources=. \
+                            -Dsonar.java.binaries=target
+                        """
                     }
                 }
             }
         }
 
-        stage('OWASP Dependency Check') {
+        stage("OWASP Dependency Check") {
             steps {
                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
-        stage('SonarQube Quality Gate Scan') {
+        stage("SonarQube Quality Gate Scan") {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
@@ -58,13 +65,13 @@ stage('Clone') {
             }
         }
 
-        stage('Trivy File System Scan') {
+        stage("Trivy File System Scan") {
             steps {
                 sh 'trivy fs --format table -o trivy-fs-report.html .'
             }
         }
 
-        stage('Build with Maven') {
+        stage("Build with Maven") {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
@@ -73,20 +80,17 @@ stage('Clone') {
         stage("Build, Test, and Push Image to Docker Hub") {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker build -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} ."
-                    sh "docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}"
-                    echo '✅ Image pushed to Docker Hub successfully!'
+                    sh '''
+                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                        docker build -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} .
+                        docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}
+                    '''
+                    echo "✅ Image ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} pushed successfully!"
                 }
             }
         }
+    }
 
     post {
         success {
-            echo '✅ Pipeline completed successfully!'
-        }
-        failure {
-            echo '❌ Build or deployment failed.'
-        }
-    }
-}
+            echo '✅ Pipeline complete
