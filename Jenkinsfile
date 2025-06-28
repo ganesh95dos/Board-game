@@ -59,7 +59,7 @@ pipeline {
 
         stage("SonarQube Quality Gate Scan") {
             steps {
-                timeout(time: 2, unit: 'MINUTES') {
+                timeout(time: 5, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
                 }
             }
@@ -98,5 +98,9 @@ pipeline {
         failure {
             echo '❌ Build or deployment failed.'
         }
+
+        always {
+        archiveArtifacts artifacts: '**/dependency-check-report.xml, trivy-fs-report.html', fingerprint: true
+    }
     }
 }
