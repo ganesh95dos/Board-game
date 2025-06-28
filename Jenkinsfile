@@ -4,10 +4,33 @@ pipeline {
 
     environment {
         IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
-        IMAGE_TAG = 'latest'
         DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID
         SONAR_HOME = tool 'sonar'
     }
+
+     parameters {
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+    }
+
+    stages {
+        stage("Validate Parameters") {
+            steps {
+                script {
+                    if (params.FRONTEND_DOCKER_TAG == '') {
+                        error("FRONTEND_DOCKER_TAG .")
+                    }
+                }
+            }
+        }
+        stage("Workspace cleanup"){
+            steps{
+                script{
+                    cleanWs()
+                }
+            }
+        }
+
+        
 
     stages {
         stage('Clone') {
@@ -58,8 +81,8 @@ pipeline {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
                     sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker build -t ${IMAGE_NAME}:${IMAGE_TAG} ."
-                    sh "docker push ${IMAGE_NAME}:${IMAGE_TAG}"
+                    sh "docker build -t ${IMAGE_NAME}:"${params.BACKEND_DOCKER_TAG}" ."
+                    sh "docker push ${IMAGE_NAME}:"${params.BACKEND_DOCKER_TAG}""
                     echo '✅ Image pushed to Docker Hub successfully!'
                 }
             }
