@@ -3,8 +3,6 @@ pipeline {
     agent any
 
     environment {
-        IMAGE_NAME = 'ganeshmestry21/bord-game-dev'
-        DOCKER_REGISTRY_CREDENTIALS = 'dockerhub-credentials'  // Jenkins credentials ID
         SONAR_HOME = tool 'sonar'
     }
 
@@ -28,32 +26,31 @@ pipeline {
                 cleanWs()
             }
         }
-
-        stage("Clone Repository") {
+stage('Clone') {
             steps {
                 git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
             }
         }
 
-        stage("SonarQube Quality Analysis") {
+        stage('SonarQube Quality Analysis') {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
                         def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectName=Board-Game -Dsonar.projectKey=Board-Game"
+                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
                     }
                 }
             }
         }
 
-        stage("OWASP Dependency Check") {
+        stage('OWASP Dependency Check') {
             steps {
                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
-        stage("SonarQube Quality Gate") {
+        stage('SonarQube Quality Gate Scan') {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
@@ -61,43 +58,28 @@ pipeline {
             }
         }
 
-        stage("Trivy File System Scan") {
+        stage('Trivy File System Scan') {
             steps {
                 sh 'trivy fs --format table -o trivy-fs-report.html .'
             }
         }
 
-        stage("Build with Maven") {
+        stage('Build with Maven') {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage("Build & Push Docker Image") {
+        stage("Build, Test, and Push Image to Docker Hub") {
             steps {
-                withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
-                    docker build -t ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG} .
-                    docker push ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG}
-                    '''
-                    echo "✅ Image pushed: ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG}"
+                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
+                    sh "docker build -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} ."
+                    sh "docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}"
+                    echo '✅ Image pushed to Docker Hub successfully!'
                 }
             }
         }
-
-        stage("Deploy with Docker Compose") {
-            steps {
-                sh '''
-                docker-compose down -v --remove-orphans || true
-                docker system prune -af --volumes || true
-                docker rm -f h2-database || true
-                docker-compose pull
-                docker-compose up -d
-                '''
-            }
-        }
-    }
 
     post {
         success {
