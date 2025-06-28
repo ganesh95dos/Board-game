@@ -8,56 +8,51 @@ pipeline {
         SONAR_HOME = tool 'sonar'
     }
 
-     parameters {
-        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Setting docker image for latest push')
+    parameters {
+        string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Docker image tag for frontend (e.g., v1, latest)')
     }
 
     stages {
         stage("Validate Parameters") {
             steps {
                 script {
-                    if (params.FRONTEND_DOCKER_TAG == '') {
-                        error("FRONTEND_DOCKER_TAG .")
+                    if (params.FRONTEND_DOCKER_TAG.trim() == '') {
+                        error("❌ FRONTEND_DOCKER_TAG cannot be empty.")
                     }
                 }
             }
         }
-        stage("Workspace cleanup"){
-            steps{
-                script{
-                    cleanWs()
-                }
+
+        stage("Workspace Cleanup") {
+            steps {
+                cleanWs()
             }
         }
 
-        
-
-    stages {
-        stage('Clone') {
+        stage("Clone Repository") {
             steps {
                 git branch: 'main', url: 'https://github.com/ganesh95dos/Board-game.git'
             }
         }
 
-        stage('SonarQube Quality Analysis') {
+        stage("SonarQube Quality Analysis") {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
-                        def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
-                        sh "${scannerHome}/bin/sonar-scanner -Dsonar.projectName=Bord-Game -Dsonar.projectKey=Bord-game"
+                        sh "${SONAR_HOME}/bin/sonar-scanner -Dsonar.projectName=Board-Game -Dsonar.projectKey=Board-Game"
                     }
                 }
             }
         }
 
-        stage('OWASP Dependency Check') {
+        stage("OWASP Dependency Check") {
             steps {
                 dependencyCheck additionalArguments: '--scan ./', odcInstallation: 'dc'
                 dependencyCheckPublisher pattern: '**/dependency-check-report.xml'
             }
         }
 
-        stage('SonarQube Quality Gate Scan') {
+        stage("SonarQube Quality Gate") {
             steps {
                 timeout(time: 2, unit: 'MINUTES') {
                     waitForQualityGate abortPipeline: false
@@ -65,43 +60,47 @@ pipeline {
             }
         }
 
-        stage('Trivy File System Scan') {
+        stage("Trivy File System Scan") {
             steps {
                 sh 'trivy fs --format table -o trivy-fs-report.html .'
             }
         }
 
-        stage('Build with Maven') {
+        stage("Build with Maven") {
             steps {
                 sh 'mvn clean package -DskipTests'
             }
         }
 
-        stage("Build, Test, and Push Image to Docker Hub") {
+        stage("Build & Push Docker Image") {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh 'echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin'
-                    sh "docker build -t ${IMAGE_NAME}:"${params.FRONTEND_DOCKER_TAG}" ."
-                    sh "docker push ${IMAGE_NAME}:"${params.FRONTEND_DOCKER_TAG}""
-                    echo '✅ Image pushed to Docker Hub successfully!'
+                withCredentials([usernamePassword(credentialsId: "${DOCKER_REGISTRY_CREDENTIALS}", usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    docker build -t ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG} .
+                    docker push ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG}
+                    '''
+                    echo "✅ Image pushed: ${IMAGE_NAME}:${FRONTEND_DOCKER_TAG}"
                 }
             }
         }
 
-        stage('Deploy with Docker Compose') {
+        stage("Deploy with Docker Compose") {
             steps {
-                sh 'docker-compose down -v --remove-orphans || true'
-                sh 'docker system prune -af --volumes || true'
-                sh 'docker rm -f h2-database || true' // <- Prevent name conflict
-                sh 'docker-compose pull'
-                sh 'docker-compose up -d'
+                sh '''
+                docker-compose down -v --remove-orphans || true
+                docker system prune -af --volumes || true
+                docker rm -f h2-database || true
+                docker-compose pull
+                docker-compose up -d
+                '''
             }
         }
     }
 
     post {
         success {
-            echo '✅ Deployment successful!'
+            echo '✅ Pipeline completed successfully!'
         }
         failure {
             echo '❌ Build or deployment failed.'
