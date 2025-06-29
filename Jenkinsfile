@@ -90,11 +90,21 @@ pipeline {
             }
         }
 
+        stage("Update Docker Compose Image Tag") {
+          steps {
+            script {
+              sh """
+                echo "🔄 Updating image tag to: ${params.FRONTEND_DOCKER_TAG}"
+                sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' docker-compose.yml
+                """
+                }
+            }
+        }
+
         stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down -v --remove-orphans || true'
                 sh 'docker rm -f h2-database || true' // <- Prevent name conflict
-                sh 'docker-compose pull'
                 sh 'docker-compose up -d'
             }
         }
