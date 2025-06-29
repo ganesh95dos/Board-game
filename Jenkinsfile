@@ -93,7 +93,6 @@ pipeline {
         stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down -v --remove-orphans || true'
-                sh 'docker system prune -af --volumes || true'
                 sh 'docker rm -f h2-database || true' // <- Prevent name conflict
                 sh 'docker-compose pull'
                 sh 'docker-compose up -d'
