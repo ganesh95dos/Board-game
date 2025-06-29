@@ -37,6 +37,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
+                        sh 'rm -rf ~/.sonar/cache'
                         def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
