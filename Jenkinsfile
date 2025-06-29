@@ -79,17 +79,29 @@ pipeline {
         }
 
         stage("Build, Test, and Push Image to Docker Hub") {
-            steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh """
-                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
-                        docker build -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} .
-                        docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}
-                    """
-                    echo "✅ Image ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} pushed successfully!"
-                }
+        steps {
+            withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                script {
+                // Pull latest image if available to use as cache
+                sh """
+                    echo "\$DOCKER_PASS" | docker login -u \$DOCKER_USER --password-stdin
+                    docker pull ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} || true
+                """
+
+                // Build with cache-from
+                sh """
+                    docker build \
+                        --cache-from=ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} \
+                        -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} .
+                """
+
+                // Push the image
+                sh "docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}"
+                echo "✅ Image ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} pushed successfully!"
             }
         }
+    }
+}
 
         stage("Update Docker Compose Image Tag") {
             steps {
