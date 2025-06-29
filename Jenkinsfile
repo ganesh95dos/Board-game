@@ -5,7 +5,7 @@ pipeline {
     environment {
         SONAR_HOME = tool 'sonar'
     }
-    
+
     parameters {
         string(name: 'FRONTEND_DOCKER_TAG', defaultValue: '', description: 'Docker image tag for frontend (e.g., v1, latest)')
     }
@@ -37,12 +37,12 @@ pipeline {
             steps {
                 withSonarQubeEnv('sonar') {
                     script {
-                        sh 'rm -rf ~/.sonar/cache'
                         def scannerHome = tool name: 'sonar', type: 'hudson.plugins.sonar.SonarRunnerInstallation'
+                        sh 'rm -rf ~/.sonar/cache'
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=Bord-game \
-                            -Dsonar.projectName=Bord-Game \
+                            -Dsonar.projectKey=Board-game \
+                            -Dsonar.projectName=Board-Game \
                             -Dsonar.sources=. \
                             -Dsonar.java.binaries=target
                         """
@@ -60,8 +60,8 @@ pipeline {
 
         stage("SonarQube Quality Gate Scan") {
             steps {
-                timeout(time: 5, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: false
+                timeout(time: 2, unit: 'MINUTES') { // Increased timeout to avoid unnecessary aborts
+                    waitForQualityGate abortPipeline: true
                 }
             }
         }
@@ -81,31 +81,29 @@ pipeline {
         stage("Build, Test, and Push Image to Docker Hub") {
             steps {
                 withCredentials([usernamePassword(credentialsId: 'dockerhub-credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
-                    sh '''
-                        echo $DOCKER_PASS | docker login -u $DOCKER_USER --password-stdin
+                    sh """
+                        echo \$DOCKER_PASS | docker login -u \$DOCKER_USER --password-stdin
                         docker build -t ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} .
                         docker push ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG}
-                    '''
+                    """
                     echo "✅ Image ganeshmestry21/bord-game-dev:${FRONTEND_DOCKER_TAG} pushed successfully!"
                 }
             }
         }
 
         stage("Update Docker Compose Image Tag") {
-          steps {
-            script {
-              sh """
-                echo "🔄 Updating image tag to: ${params.FRONTEND_DOCKER_TAG}"
-                sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' docker-compose.yml
+            steps {
+                sh """
+                    echo "🔄 Updating image tag to: ${params.FRONTEND_DOCKER_TAG}"
+                    sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' docker-compose.yml
                 """
-                }
             }
         }
 
         stage('Deploy with Docker Compose') {
             steps {
                 sh 'docker-compose down -v --remove-orphans || true'
-                sh 'docker rm -f h2-database || true' // <- Prevent name conflict
+                sh 'docker rm -f h2-database || true'
                 sh 'docker-compose up -d'
             }
         }
@@ -118,9 +116,8 @@ pipeline {
         failure {
             echo '❌ Build or deployment failed.'
         }
-
         always {
-        archiveArtifacts artifacts: '**/dependency-check-report.xml, trivy-fs-report.html', fingerprint: true
-          }
+            archiveArtifacts artifacts: '**/dependency-check-report.xml, trivy-fs-report.html', fingerprint: true
+        }
     }
 }
