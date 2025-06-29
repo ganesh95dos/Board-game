@@ -41,8 +41,8 @@ pipeline {
                         sh 'rm -rf ~/.sonar/cache'
                         sh """
                             ${scannerHome}/bin/sonar-scanner \
-                            -Dsonar.projectKey=Board-game \
-                            -Dsonar.projectName=Board-Game \
+                            -Dsonar.projectKey=Bord-game \
+                            -Dsonar.projectName=Bord-game \
                             -Dsonar.sources=. \
                             -Dsonar.java.binaries=target
                         """
