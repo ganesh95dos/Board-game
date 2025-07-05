@@ -1,0 +1,25 @@
+kind: Deployment
+metadata:
+  name: board-game
+  namespace: board-game
+apiVersion: apps/v1
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: board-game
+  template:
+    metadata:
+      name: board-game
+      labels:
+        app: board-game
+    spec:
+      containers:
+      - name: board-game
+        image: ganeshmestry21/bord-game-dev:v1
+        ports:
+        - containerPort: 8080
+  
+
+
+
