@@ -13,7 +13,7 @@ services:
       - h2-data:/opt/h2-data
 
   boardgame-app:
-    image: ganeshmestry21/bord-game-dev:latest
+    image: ganeshmestry21/bord-game-dev:v1
     ports:
       - "8081:8080"
     depends_on:
