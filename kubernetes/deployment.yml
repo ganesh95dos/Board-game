@@ -15,7 +15,6 @@ spec:
         app: board-game
     spec:
       containers:
-      automountServiceAccountToken: false
       - name: board-game
         image: ganeshmestry21/bord-game-dev:v1
         ports:
