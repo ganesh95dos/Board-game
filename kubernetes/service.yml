@@ -6,11 +6,10 @@ metadata:
   labels:
     app: board-game
 spec:
-  type: ClusterIP
+  type: NodePort
   selector:
     app: board-game
   ports:
-    - name: http
-      protocol: TCP
-      port: 80
+    - port: 80
       targetPort: 8080
+      nodePort: 30080
