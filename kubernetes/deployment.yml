@@ -31,10 +31,10 @@ spec:
             limits:
               memory: "512Mi"
               cpu: "500m" 
-    volumes:
-      - name: board-game-storage
-        persistentVolumeClaim:
-          claimName: board-game-pvc
+      volumes:
+        - name: board-game-storage
+          persistentVolumeClaim:
+            claimName: board-game-pvc
 
 
 
