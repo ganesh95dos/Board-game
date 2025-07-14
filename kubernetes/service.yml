@@ -10,10 +10,12 @@ spec:
   selector:
     app: board-game
   ports:
-    - port: 80
+    - name: http-main
+      port: 80
       targetPort: 8080
       nodePort: 30080
 
-    - port: 81
+    - name: http-db
+      port: 81
       targetPort: 81
       nodePort: 30081
