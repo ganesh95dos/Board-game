@@ -13,3 +13,7 @@ spec:
     - port: 80
       targetPort: 8080
       nodePort: 30080
+
+    - port: 81
+      targetPort: 81
+      nodePort: 30081
