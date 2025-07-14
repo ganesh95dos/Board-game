@@ -16,7 +16,7 @@ spec:
       nodePort: 30080
 
     - name: http-db
-      port: 81
-      targetPort: 81
+      port: 1521
+      targetPort: 1521
       nodePort: 30081
 
