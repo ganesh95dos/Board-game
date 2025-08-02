@@ -1,10 +1,12 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: board-game-pvc
+  name: h2-pvc
+  namespace: board-game
 spec:
   accessModes:
     - ReadWriteOnce
+  storageClassName: ebs-sc
   resources:
     requests:
-      storage: 1Gi
+      storage: 5Gi
