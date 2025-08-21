@@ -58,6 +58,7 @@ pipeline {
                             -Dsonar.projectName=Board-Game \
                             -Dsonar.sources=. \
                             -Dsonar.java.binaries=target
+                            -Dsonar.exclusions=**/target/**,**/node_modules/**,**/frontend/node_modules/**,**/frontend/dist/**
                         """
                     }
                 }
