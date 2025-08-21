@@ -133,6 +133,7 @@ pipeline {
 
                         # Stage and commit changes
                         git add docker-compose.yaml
+                        git add ./kubernetes/boardgame-app/boardgameDep.yml
 
                         # Commit only if there are changes
                         git diff --cached --quiet || git commit -m "Update Docker tag to ${FRONTEND_DOCKER_TAG}"
