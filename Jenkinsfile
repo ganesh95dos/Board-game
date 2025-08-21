@@ -105,7 +105,7 @@ pipeline {
             }
         }
 
-         stage("Update Docker Compose Image Tag") {
+         stage("Update Image Tag") {
              steps {
                 script {
                     sh 'ls -a'
