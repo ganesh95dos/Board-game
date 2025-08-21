@@ -56,8 +56,9 @@ pipeline {
                             ${scannerHome}/bin/sonar-scanner \
                             -Dsonar.projectKey=Board-Game \
                             -Dsonar.projectName=Board-Game \
-                            -Dsonar.sources=. \
-                            -Dsonar.java.binaries=target
+                            -Dsonar.sources=src/main/java \
+                            -Dsonar.java.binaries=target \
+                            -Dsonar.exclusions=**/target/**,**/node_modules/**,**/frontend/node_modules/**,**/frontend/dist/**
                         """
                     }
                 }
