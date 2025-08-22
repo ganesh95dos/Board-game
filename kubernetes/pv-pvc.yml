@@ -8,7 +8,7 @@ spec:
   accessModes:
     - ReadWriteOnce
   hostPath:
-    path: /mnt/data/h2-db   # Data stored on Minikube VM
+    path: /mnt/data/h2-storage   # Data stored on Minikube VM
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
