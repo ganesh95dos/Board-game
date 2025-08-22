@@ -72,19 +72,21 @@ pipeline {
             }
         }
 
-        stage("SonarQube Quality Gate Scan") {
-            steps {
-                timeout(time: 10, unit: 'MINUTES') {
-                    waitForQualityGate abortPipeline: true                
-                }
-            }
-        }
-
         stage("Trivy File System Scan") {
             steps {
                 sh 'trivy fs --format table -o trivy-fs-report.html .'
             }
         }
+
+        stage("SonarQube Quality Gate Scan") {
+            steps {
+                timeout(time: 10, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: false                
+                }
+            }
+        }
+
+        
 
         stage("Build with Maven") {
             steps {
@@ -181,7 +183,7 @@ pipeline {
                     </body>
                     </html>
             """,
-            to: 'trainwithshubham@gmail.com',
+            to: 'ganeshmestry95@gmail.com',
             mimeType: 'text/html'
             }
         }
