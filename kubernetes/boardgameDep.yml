@@ -4,6 +4,7 @@ metadata:
   name: boardgame-app
   namespace: board-game
 spec:
+  serviceName: boardgame-app
   replicas: 2
   selector:
     matchLabels:
@@ -28,13 +29,14 @@ spec:
               memory: "1Gi"
                 
           volumeMounts:
-            - name: h2-volume
+            - name: data
               mountPath: /opt/h2-data
-volumeClaimTemplates:
+  volumeClaimTemplates:
     - metadata:
         name: data
       spec:
-        accessModes: ["ReadWriteOnce"]
+        accessModes:
+          - ReadWriteOnce
         resources:
           requests:
             storage: 1Gi
