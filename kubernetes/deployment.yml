@@ -1,10 +1,11 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: boardgame-app
   namespace: board-game
 spec:
-  replicas: 4
+  serviceName: boardgame-app
+  replicas: 2
   selector:
     matchLabels:
       app: boardgame-app
@@ -18,7 +19,6 @@ spec:
           image: ganeshmestry21/bord-game-dev:v1
           ports:
             - containerPort: 8080
-
           resources:
             requests:
               cpu: "250m"
@@ -28,9 +28,14 @@ spec:
               memory: "1Gi"
 
           volumeMounts:
-            - name: h2-volume
-              mountPath: /opt/h2-data  # H2 DB data persists here
-      volumes:
-        - name: h2-volume
-          persistentVolumeClaim:
-            claimName: h2-pvc
+            - name: data
+              mountPath: /opt/h2-data
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi
+
