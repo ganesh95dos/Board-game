@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: boardgame-app
-  namespace: board-game
+  namespace: board-game-statful-app  
 spec:
   selector:
     app: boardgame-app
