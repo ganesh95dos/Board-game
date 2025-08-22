@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: boardgame-app
-          image: ganeshmestry21/bord-game-dev:v1
+          image:ganeshmestry21/bord-game-dev:v1
           ports:
             - containerPort: 8080
 
