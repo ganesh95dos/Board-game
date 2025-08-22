@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: StatefulSet
 metadata:
   name: boardgame-app
-  namespace: board-game
+  namespace: board-game-statfull-app
 spec:
   serviceName: boardgame-app
   replicas: 2
@@ -26,7 +26,6 @@ spec:
             limits:
               cpu: "500m"
               memory: "1Gi"
-
           volumeMounts:
             - name: data
               mountPath: /opt/h2-data
@@ -38,4 +37,3 @@ spec:
         resources:
           requests:
             storage: 1Gi
-

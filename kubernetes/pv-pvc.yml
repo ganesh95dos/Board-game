@@ -1,20 +1,20 @@
 apiVersion: v1
 kind: PersistentVolume
 metadata:
-  name: statfull-pv
+  name: boardgame-pv
 spec:
   capacity:
     storage: 1Gi
   accessModes:
     - ReadWriteMany
   hostPath:
-    path: /mnt/data/h2-storage   # Data stored on Minikube VM
+    path: /mnt/data/h2-storage
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: statfull-pv
-  namespace: board-game-statefull-app 
+  name: boardgame-pvc
+  namespace: board-game-statfull-app
 spec:
   accessModes:
     - ReadWriteMany
