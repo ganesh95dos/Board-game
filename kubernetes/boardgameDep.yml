@@ -1,11 +1,10 @@
 apiVersion: apps/v1
-kind: StatefulSet
+kind: Deployment
 metadata:
   name: boardgame-app
   namespace: board-game
 spec:
-  serviceName: boardgame-app
-  replicas: 2
+  replicas: 4
   selector:
     matchLabels:
       app: boardgame-app
@@ -27,16 +26,11 @@ spec:
             limits:
               cpu: "500m"
               memory: "1Gi"
-                
+
           volumeMounts:
-            - name: data
-              mountPath: /opt/h2-data
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - ReadWriteOnce
-        resources:
-          requests:
-            storage: 1Gi
+            - name: h2-volume
+              mountPath: /opt/h2-data  # H2 DB data persists here
+      volumes:
+        - name: h2-volume
+          persistentVolumeClaim:
+            claimName: h2-pvc
