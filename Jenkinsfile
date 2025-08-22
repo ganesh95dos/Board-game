@@ -115,6 +115,7 @@ pipeline {
                     sh """
                       sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' ./docker-compose.yaml
                       sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' ./kubernetes/boardgame-app/boardgameDep.yml
+                      sed -i 's|ganeshmestry21/bord-game-dev:.*|ganeshmestry21/bord-game-dev:${params.FRONTEND_DOCKER_TAG}|' ./kubernetes/boardgameDep.yml
                     """
               } else {
             echo "⚠️ docker-compose.yml not found — skipping tag update."
