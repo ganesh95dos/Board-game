@@ -156,13 +156,10 @@ pipeline {
             archiveArtifacts artifacts: '**/dependency-check-report.xml, trivy-fs-report.html', fingerprint: true
         }
         
-        success {
-
+        success {   
             build job: "Board-Game-CD", parameters: [
-                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
-             ]
-
-            
+                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}")
+            ]
             script {               
                 emailext attachLog: true,
                 from: 'ganeshmestry95@gmail.com',
@@ -207,6 +204,8 @@ pipeline {
             mimeType: 'text/html'
             }
         }
+
+        
     }
 }
 
