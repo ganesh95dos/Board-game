@@ -148,13 +148,6 @@ pipeline {
                     }
                 }
             }
-
-        stage("Deployed"){
-            steps{
-                sh 'docker-compose down -v'
-                sh 'docker-compose up -d'
-            }
-        }
     }
 
     post {
@@ -164,7 +157,13 @@ pipeline {
         }
         
         success {
-            script {
+
+            build job: "Board-Game-CD", parameters: [
+                string(name: 'FRONTEND_DOCKER_TAG', value: "${params.FRONTEND_DOCKER_TAG}"),
+             ]
+
+            
+            script {               
                 emailext attachLog: true,
                 from: 'ganeshmestry95@gmail.com',
                 subject: "Board-Game Application has been updated and deployed - '${currentBuild.result}'",
